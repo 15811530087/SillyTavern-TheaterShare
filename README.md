@@ -21,7 +21,7 @@ HTML 作品通过不带 `allow-same-origin` 权限的 iframe 沙箱预览，不�
 SillyTavern 的“扩展 → 安装扩展”中粘贴仓库的 HTTPS 地址，例如：
 
 ```text
-https://github.com/你的用户名/SillyTavern-TheaterShare
+https://github.com/15811530087/SillyTavern-TheaterShare
 ```
 
 前端扩展仓库根目录必须直接包含 `manifest.json`、`index.js` 和 `style.css`，不能在仓库外面
