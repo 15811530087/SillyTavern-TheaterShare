@@ -105,36 +105,12 @@ function decodeShareCode(value) {
     }
 }
 
-function encodeUtf8Base64Url(value) {
-    const bytes = new TextEncoder().encode(value);
-    let binary = '';
-    for (const byte of bytes) binary += String.fromCharCode(byte);
-    return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-}
-
 function decodeUtf8Base64Url(value) {
     const encoded = value.replace(/-/g, '+').replace(/_/g, '/');
     const padded = encoded.padEnd(Math.ceil(encoded.length / 4) * 4, '=');
     const binary = atob(padded);
     const bytes = Uint8Array.from(binary, character => character.charCodeAt(0));
     return new TextDecoder().decode(bytes);
-}
-
-function encodeOfflineShareCode(item) {
-    const payload = {
-        version: 2,
-        item: {
-            id: item.id,
-            title: item.title,
-            author: item.author,
-            description: item.description,
-            tags: item.tags,
-            contentType: item.contentType,
-            content: item.content,
-            createdAt: item.createdAt,
-        },
-    };
-    return `${OFFLINE_CODE_PREFIX}${encodeUtf8Base64Url(JSON.stringify(payload))}`;
 }
 
 function decodeOfflineShareCode(value) {
@@ -432,26 +408,6 @@ async function openWindow() {
         dialog.find('#theater_share_content').val(await file.text());
         if (!dialog.find('#theater_share_title').val()) {
             dialog.find('#theater_share_title').val(file.name.replace(/\.[^.]+$/, ''));
-        }
-    });
-    dialog.find('#theater_share_offline').on('click', () => {
-        const result = dialog.find('#theater_share_offline_result').empty();
-        try {
-            const item = makeDraftItem(dialog);
-            validateDraftItem(item);
-            const code = encodeOfflineShareCode(item);
-            const output = $('<textarea class="text_pole" rows="5" readonly></textarea>').val(code);
-            result.append(
-                $('<p></p>').text(`离线分享码已生成（${code.length.toLocaleString()} 个字符）。完整作品已包含在分享码中，不会上传到服务器。`),
-                output,
-                makeButton('复制 TS2 分享码', 'fa-copy', () => navigator.clipboard.writeText(code).then(() => toastr.success('TS2 分享码已复制。'))),
-            );
-            if (code.length > 100000) {
-                result.append($('<p class="theater-share-meta"></p>').text('分享码较长，部分聊天软件可能截断；建议通过文本文件发送。'));
-            }
-        } catch (error) {
-            toastr.error(error.message);
-            result.append($('<p></p>').text(error.message));
         }
     });
     dialog.find('#theater_share_upload').on('click', async function () {
