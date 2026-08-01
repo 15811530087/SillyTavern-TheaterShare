@@ -1,61 +1,106 @@
 <div class="theater-share-window">
-    <div class="theater-share-tabs">
-        <button class="menu_button theater-share-tab active" data-tab="gallery">作品广场</button>
-        <button class="menu_button theater-share-tab" data-tab="upload">上传作品</button>
-        <button class="menu_button theater-share-tab" data-tab="link">打开分享码/链接</button>
-        <button class="menu_button theater-share-tab" data-tab="local">我的收藏</button>
-    </div>
-
-    <section data-panel="gallery">
-        <div class="theater-share-toolbar">
-            <input id="theater_share_search" class="text_pole" placeholder="搜索标题、作者或简介">
-            <button id="theater_share_refresh" class="menu_button"><i class="fa-solid fa-rotate"></i> 刷新</button>
+    <header class="theater-share-hero">
+        <div class="theater-share-hero-icon"><i class="fa-solid fa-masks-theater"></i></div>
+        <div>
+            <div class="theater-share-eyebrow">THEATER SHARE</div>
+            <h2>小剧场分享</h2>
+            <p>发现、创作并分享属于你的故事片段</p>
         </div>
-        <div id="theater_share_gallery" class="theater-share-grid"></div>
-        <div class="theater-share-pager">
-            <button id="theater_share_previous" class="menu_button">上一页</button>
-            <span id="theater_share_page"></span>
-            <button id="theater_share_next" class="menu_button">下一页</button>
-        </div>
-    </section>
+    </header>
 
-    <section data-panel="upload" hidden>
-        <label>标题 *</label>
-        <input id="theater_share_title" class="text_pole" maxlength="100">
-        <label>作者</label>
-        <input id="theater_share_author" class="text_pole" maxlength="60" placeholder="匿名玩家">
-        <label>简介</label>
-        <textarea id="theater_share_description" class="text_pole" maxlength="500"></textarea>
-        <label>标签（使用逗号分隔，最多 10 个）</label>
-        <input id="theater_share_tags" class="text_pole" maxlength="249" placeholder="例如：恋爱，奇幻，互动">
-        <label>内容类型</label>
-        <select id="theater_share_content_type" class="text_pole">
-            <option value="text">纯文本 / Markdown</option>
-            <option value="html">HTML 小剧场（隔离预览）</option>
-            <option value="json">JSON 数据</option>
-        </select>
-        <label>选择本地文件（.txt、.md、.html、.json，最大 256 KB）</label>
-        <input id="theater_share_file" type="file" accept=".txt,.md,.html,.htm,.json,text/plain,text/html,application/json">
-        <label>内容 *</label>
-        <textarea id="theater_share_content" class="text_pole theater-share-content" placeholder="也可以直接粘贴内容"></textarea>
-        <div class="theater-share-actions">
-            <button id="theater_share_offline" class="menu_button"><i class="fa-solid fa-ticket"></i> 生成 TS2 离线分享码</button>
-            <button id="theater_share_upload" class="menu_button"><i class="fa-solid fa-cloud-arrow-up"></i> 上传到服务器</button>
-        </div>
-        <div id="theater_share_offline_result"></div>
-        <div id="theater_share_upload_result"></div>
-    </section>
+    <nav class="theater-share-tabs" aria-label="小剧场功能">
+        <button class="theater-share-tab active" data-tab="gallery"><i class="fa-solid fa-compass"></i><span>作品广场</span></button>
+        <button class="theater-share-tab" data-tab="upload"><i class="fa-solid fa-pen-nib"></i><span>创作分享</span></button>
+        <button class="theater-share-tab" data-tab="link"><i class="fa-solid fa-ticket"></i><span>打开分享码</span></button>
+        <button class="theater-share-tab" data-tab="local"><i class="fa-solid fa-bookmark"></i><span>我的收藏</span></button>
+    </nav>
 
-    <section data-panel="link" hidden>
-        <p>粘贴由“小剧场分享”生成的分享码或完整链接：</p>
-        <div class="theater-share-toolbar">
-            <textarea id="theater_share_link" class="text_pole" rows="4" placeholder="TS2.xxxxx、TS1.xxxxx 或完整分享链接"></textarea>
-            <button id="theater_share_open_link" class="menu_button">读取</button>
-        </div>
-        <div id="theater_share_link_result"></div>
-    </section>
+    <main class="theater-share-panels">
+        <section class="theater-share-panel" data-panel="gallery">
+            <div class="theater-share-section-heading">
+                <div><h3>作品广场</h3><p>浏览公开作品，点击标签可以快速筛选</p></div>
+            </div>
+            <div class="theater-share-toolbar">
+                <div class="theater-share-search">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input id="theater_share_search" class="text_pole" placeholder="搜索标题、作者、简介或标签">
+                </div>
+                <button id="theater_share_refresh" class="menu_button theater-share-icon-button"><i class="fa-solid fa-rotate"></i><span>刷新</span></button>
+            </div>
+            <div id="theater_share_gallery" class="theater-share-grid"></div>
+            <div class="theater-share-pager">
+                <button id="theater_share_previous" class="menu_button"><i class="fa-solid fa-chevron-left"></i> 上一页</button>
+                <span id="theater_share_page"></span>
+                <button id="theater_share_next" class="menu_button">下一页 <i class="fa-solid fa-chevron-right"></i></button>
+            </div>
+        </section>
 
-    <section data-panel="local" hidden>
-        <div id="theater_share_local" class="theater-share-grid"></div>
-    </section>
+        <section class="theater-share-panel" data-panel="upload" hidden>
+            <div class="theater-share-section-heading">
+                <div><h3>创作与分享</h3><p>TS2 分享码包含完整作品，无需服务器或任何账户</p></div>
+                <span class="theater-share-status-pill"><i class="fa-solid fa-shield-halved"></i> 本地处理</span>
+            </div>
+            <div class="theater-share-form-grid">
+                <div class="theater-share-field theater-share-field-wide">
+                    <label for="theater_share_title">作品标题 <span>*</span></label>
+                    <input id="theater_share_title" class="text_pole" maxlength="100" placeholder="给你的小剧场起个名字">
+                </div>
+                <div class="theater-share-field">
+                    <label for="theater_share_author">作者</label>
+                    <input id="theater_share_author" class="text_pole" maxlength="60" placeholder="匿名玩家">
+                </div>
+                <div class="theater-share-field">
+                    <label for="theater_share_content_type">内容类型</label>
+                    <select id="theater_share_content_type" class="text_pole">
+                        <option value="text">纯文本 / Markdown</option>
+                        <option value="html">HTML 小剧场（隔离预览）</option>
+                        <option value="json">JSON 数据</option>
+                    </select>
+                </div>
+                <div class="theater-share-field theater-share-field-wide">
+                    <label for="theater_share_description">作品简介</label>
+                    <textarea id="theater_share_description" class="text_pole" maxlength="500" rows="3" placeholder="简单介绍一下这个故事"></textarea>
+                </div>
+                <div class="theater-share-field theater-share-field-wide">
+                    <label for="theater_share_tags">标签</label>
+                    <input id="theater_share_tags" class="text_pole" maxlength="249" placeholder="恋爱，奇幻，互动">
+                    <small>使用逗号分隔，最多 10 个标签</small>
+                </div>
+                <div class="theater-share-field theater-share-field-wide theater-share-file-field">
+                    <label for="theater_share_file"><i class="fa-solid fa-file-arrow-up"></i> 从本地文件载入</label>
+                    <input id="theater_share_file" type="file" accept=".txt,.md,.html,.htm,.json,text/plain,text/html,application/json">
+                    <small>支持 TXT、Markdown、HTML、JSON，最大 256 KB</small>
+                </div>
+                <div class="theater-share-field theater-share-field-wide">
+                    <label for="theater_share_content">作品内容 <span>*</span></label>
+                    <textarea id="theater_share_content" class="text_pole theater-share-content" placeholder="在这里粘贴或创作你的小剧场……"></textarea>
+                </div>
+            </div>
+            <div class="theater-share-actions theater-share-submit-actions">
+                <button id="theater_share_offline" class="menu_button theater-share-primary"><i class="fa-solid fa-wand-magic-sparkles"></i> 生成 TS2 离线分享码</button>
+                <button id="theater_share_upload" class="menu_button theater-share-secondary"><i class="fa-solid fa-cloud-arrow-up"></i> 上传到服务器</button>
+            </div>
+            <div id="theater_share_offline_result" class="theater-share-result"></div>
+            <div id="theater_share_upload_result" class="theater-share-result"></div>
+        </section>
+
+        <section class="theater-share-panel" data-panel="link" hidden>
+            <div class="theater-share-section-heading">
+                <div><h3>打开分享码</h3><p>粘贴 TS2 离线码、TS1 服务器码或完整分享链接</p></div>
+            </div>
+            <div class="theater-share-code-box">
+                <i class="fa-solid fa-ticket theater-share-code-icon"></i>
+                <textarea id="theater_share_link" class="text_pole" rows="7" placeholder="在这里粘贴 TS2.xxxxx、TS1.xxxxx 或完整分享链接"></textarea>
+                <button id="theater_share_open_link" class="menu_button theater-share-primary"><i class="fa-solid fa-box-open"></i> 读取作品</button>
+            </div>
+            <div id="theater_share_link_result" class="theater-share-single-result"></div>
+        </section>
+
+        <section class="theater-share-panel" data-panel="local" hidden>
+            <div class="theater-share-section-heading">
+                <div><h3>我的收藏</h3><p>收藏保存在当前酒馆的扩展设置中</p></div>
+            </div>
+            <div id="theater_share_local" class="theater-share-grid"></div>
+        </section>
+    </main>
 </div>

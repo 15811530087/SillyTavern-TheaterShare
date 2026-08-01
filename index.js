@@ -267,8 +267,16 @@ function loadPublicShare(url) {
 
 function renderCard(item, options = {}) {
     const card = $('<article class="theater-share-card"></article>');
-    card.append($('<h3></h3>').text(item.title));
-    card.append($('<div class="theater-share-meta"></div>').text(`${item.author || '匿名玩家'} · ${formatDate(item.createdAt)}`));
+    const typeLabels = { text: 'TEXT', html: 'HTML', json: 'JSON' };
+    const title = $('<div class="theater-share-card-title"></div>');
+    title.append($('<h3></h3>').text(item.title));
+    title.append($('<span class="theater-share-type-badge"></span>').text(typeLabels[item.contentType] || 'STORY'));
+    card.append(title);
+    card.append(
+        $('<div class="theater-share-meta"></div>')
+            .append($('<i class="fa-solid fa-user-pen"></i>'), document.createTextNode(` ${item.author || '匿名玩家'}  ·  `),
+                $('<i class="fa-regular fa-clock"></i>'), document.createTextNode(` ${formatDate(item.createdAt)}`)),
+    );
     if (item.description) {
         card.append($('<p></p>').text(item.description));
     }

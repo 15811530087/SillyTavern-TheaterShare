@@ -1,19 +1,25 @@
 <div class="theater-share-settings">
     <div class="inline-drawer">
         <div class="inline-drawer-toggle inline-drawer-header">
-            <b>小剧场分享</b>
+            <div class="theater-share-settings-title">
+                <span class="theater-share-settings-icon"><i class="fa-solid fa-masks-theater"></i></span>
+                <span><b>小剧场分享</b><small>离线分享 · 作品广场</small></span>
+            </div>
             <div class="inline-drawer-icon fa-solid fa-circle-chevron-down down"></div>
         </div>
         <div class="inline-drawer-content">
-            <p>上传本地小剧场，浏览公开广场，或粘贴其他酒馆生成的分享链接。</p>
-            <label for="theater_share_server_url">分享服务器地址</label>
-            <input id="theater_share_server_url" class="text_pole" type="url" placeholder="留空则使用当前酒馆服务器">
-            <small>跨酒馆读取需分享服务器可从互联网访问。上传默认发送到当前酒馆服务器。</small>
-            <div class="theater-share-actions">
-                <div id="theater_share_open" class="menu_button">
-                    <i class="fa-solid fa-masks-theater"></i> 打开小剧场广场
-                </div>
+            <div class="theater-share-settings-note">
+                <i class="fa-solid fa-circle-info"></i>
+                <span>TS2 离线分享无需配置服务器；下方地址仅用于公开作品广场和服务器上传。</span>
             </div>
+            <div class="theater-share-field">
+                <label for="theater_share_server_url">分享服务器地址</label>
+                <input id="theater_share_server_url" class="text_pole" type="url" placeholder="留空则使用当前酒馆服务器">
+                <small>只填写协议、域名或 IP 与端口，不要填写 API 路径。</small>
+            </div>
+            <button id="theater_share_open" class="menu_button theater-share-primary theater-share-settings-open">
+                <i class="fa-solid fa-masks-theater"></i> 打开小剧场分享
+            </button>
         </div>
     </div>
 </div>
