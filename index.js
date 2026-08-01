@@ -1,10 +1,11 @@
-import { getRequestHeaders, saveSettingsDebounced } from '../../../../script.js';
+import { saveSettingsDebounced } from '../../../../script.js';
 import { extension_settings, renderExtensionTemplateAsync } from '../../../extensions.js';
 import { callGenericPopup, POPUP_TYPE } from '../../../popup.js';
 
 const MODULE_NAME = 'third-party/theater-share';
 const SETTINGS_KEY = 'theaterShare';
 const API_PATH = '/api/plugins/theater-share';
+const PUBLIC_API_URL = 'https://sillytavern-theater-share.heater-hare-ata.workers.dev';
 const MAX_FILE_SIZE = 256 * 1024;
 const OFFLINE_CODE_PREFIX = 'TS2.';
 const DEFAULT_SETTINGS = {
@@ -36,7 +37,7 @@ function normalizeServerUrl(value = settings().serverUrl) {
 }
 
 function apiUrl(path = '') {
-    return `${normalizeServerUrl()}${API_PATH}${path}`;
+    return `${PUBLIC_API_URL}${path}`;
 }
 
 async function readError(response) {
@@ -71,7 +72,10 @@ function makeButton(label, icon, handler) {
 }
 
 function shareUrl(item) {
-    const source = item.source || normalizeServerUrl();
+    if (item.source === PUBLIC_API_URL || !item.source) {
+        return `${PUBLIC_API_URL}/items/${encodeURIComponent(item.id)}`;
+    }
+    const source = item.source;
     return `${source}${item.sharePath || `/theater-share/${encodeURIComponent(item.id)}.html`}`;
 }
 
@@ -236,11 +240,12 @@ async function previewItem(item) {
     });
 }
 
-async function loadFullItem(item, source = normalizeServerUrl()) {
+async function loadFullItem(item, source = PUBLIC_API_URL) {
     if (typeof item.content === 'string') {
         return { ...item, source };
     }
-    const value = await fetchJson(`${source}${API_PATH}/items/${encodeURIComponent(item.id)}`);
+    const path = source === PUBLIC_API_URL ? '/items' : `${API_PATH}/items`;
+    const value = await fetchJson(`${source}${path}/${encodeURIComponent(item.id)}`);
     return { ...value, source };
 }
 
@@ -329,7 +334,7 @@ function renderCard(item, options = {}) {
             try {
                 await fetchJson(apiUrl(`/items/${encodeURIComponent(item.id)}`), {
                     method: 'DELETE',
-                    headers: { ...getRequestHeaders(), 'X-Delete-Token': token },
+                    headers: { 'X-Delete-Token': token },
                 });
                 delete settings().deleteTokens[item.id];
                 saveSettingsDebounced();
@@ -372,7 +377,7 @@ async function openWindow() {
             total = result.total;
             container.empty();
             if (!result.items.length) container.append($('<p></p>').text('暂时没有作品，来上传第一个小剧场吧。'));
-            result.items.forEach(item => container.append(renderCard({ ...item, source: normalizeServerUrl() })));
+            result.items.forEach(item => container.append(renderCard({ ...item, source: PUBLIC_API_URL })));
             const pages = Math.max(1, Math.ceil(total / pageSize));
             dialog.find('#theater_share_page').text(`第 ${page} / ${pages} 页，共 ${total} 个`);
             dialog.find('#theater_share_previous').prop('disabled', page <= 1);
@@ -448,15 +453,12 @@ async function openWindow() {
         const button = $(this).prop('disabled', true);
         const result = dialog.find('#theater_share_upload_result').empty();
         try {
-            if (normalizeServerUrl() !== window.location.origin) {
-                throw new Error('为保护 CSRF 安全，上传只能提交到当前打开的酒馆服务器；请将分享服务器地址留空后上传。');
-            }
             const draft = makeDraftItem(dialog);
             validateDraftItem(draft);
             const payload = { ...draft, tags: draft.tags.join(',') };
             const response = await fetchJson(apiUrl('/items'), {
                 method: 'POST',
-                headers: getRequestHeaders(),
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload),
             });
             settings().deleteTokens[response.item.id] = response.deleteToken;
@@ -494,7 +496,8 @@ async function openWindow() {
             const url = new URL(input);
             const isApiLink = url.pathname.match(/\/api\/plugins\/theater-share\/items\/[^/]+$/);
             const isPublicLink = url.pathname.match(/\/theater-share\/[^/]+\.html$/);
-            if (!['http:', 'https:'].includes(url.protocol) || (!isApiLink && !isPublicLink)) {
+            const isWorkerLink = url.origin === PUBLIC_API_URL && url.pathname.match(/^\/items\/[0-9a-f-]+$/i);
+            if (!['http:', 'https:'].includes(url.protocol) || (!isApiLink && !isPublicLink && !isWorkerLink)) {
                 throw new Error('这不是有效的小剧场分享链接。');
             }
             const item = isPublicLink
