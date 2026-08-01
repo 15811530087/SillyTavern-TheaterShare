@@ -1,0 +1,11 @@
+{
+    "display_name": "小剧场分享",
+    "loading_order": 50,
+    "requires": [],
+    "optional": [],
+    "js": "index.js",
+    "css": "style.css",
+    "author": "SillyTavern community",
+    "version": "1.1.0",
+    "homePage": ""
+}

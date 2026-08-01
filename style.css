@@ -1,0 +1,16 @@
+.theater-share-window { min-width: min(760px, 90vw); }
+.theater-share-tabs, .theater-share-toolbar, .theater-share-actions, .theater-share-pager {
+    display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; margin: 0.6rem 0;
+}
+.theater-share-toolbar .text_pole { flex: 1; min-width: 14rem; }
+.theater-share-tab.active { outline: 2px solid var(--SmartThemeQuoteColor); }
+.theater-share-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 0.7rem; margin: 0.7rem 0; }
+.theater-share-card { border: 1px solid var(--SmartThemeBorderColor); border-radius: 8px; padding: 0.8rem; background: var(--black30a); }
+.theater-share-card h3 { margin: 0 0 0.35rem; overflow-wrap: anywhere; }
+.theater-share-card p { white-space: pre-wrap; overflow-wrap: anywhere; }
+.theater-share-meta { opacity: 0.75; font-size: 0.9em; }
+.theater-share-content { min-height: 220px; font-family: var(--monoFontFamily, monospace); }
+.theater-share-preview-text { white-space: pre-wrap; overflow-wrap: anywhere; max-height: 60vh; overflow: auto; }
+.theater-share-preview-frame { width: min(850px, 85vw); height: 60vh; border: 1px solid var(--SmartThemeBorderColor); background: white; }
+.theater-share-pager { justify-content: center; }
+.theater-share-settings small { display: block; opacity: 0.8; margin-top: 0.3rem; }

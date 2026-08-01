@@ -1,0 +1,55 @@
+<div class="theater-share-window">
+    <div class="theater-share-tabs">
+        <button class="menu_button theater-share-tab active" data-tab="gallery">作品广场</button>
+        <button class="menu_button theater-share-tab" data-tab="upload">上传作品</button>
+        <button class="menu_button theater-share-tab" data-tab="link">打开链接</button>
+        <button class="menu_button theater-share-tab" data-tab="local">我的收藏</button>
+    </div>
+
+    <section data-panel="gallery">
+        <div class="theater-share-toolbar">
+            <input id="theater_share_search" class="text_pole" placeholder="搜索标题、作者或简介">
+            <button id="theater_share_refresh" class="menu_button"><i class="fa-solid fa-rotate"></i> 刷新</button>
+        </div>
+        <div id="theater_share_gallery" class="theater-share-grid"></div>
+        <div class="theater-share-pager">
+            <button id="theater_share_previous" class="menu_button">上一页</button>
+            <span id="theater_share_page"></span>
+            <button id="theater_share_next" class="menu_button">下一页</button>
+        </div>
+    </section>
+
+    <section data-panel="upload" hidden>
+        <label>标题 *</label>
+        <input id="theater_share_title" class="text_pole" maxlength="100">
+        <label>作者</label>
+        <input id="theater_share_author" class="text_pole" maxlength="60" placeholder="匿名玩家">
+        <label>简介</label>
+        <textarea id="theater_share_description" class="text_pole" maxlength="500"></textarea>
+        <label>内容类型</label>
+        <select id="theater_share_content_type" class="text_pole">
+            <option value="text">纯文本 / Markdown</option>
+            <option value="html">HTML 小剧场（隔离预览）</option>
+            <option value="json">JSON 数据</option>
+        </select>
+        <label>选择本地文件（.txt、.md、.html、.json，最大 256 KB）</label>
+        <input id="theater_share_file" type="file" accept=".txt,.md,.html,.htm,.json,text/plain,text/html,application/json">
+        <label>内容 *</label>
+        <textarea id="theater_share_content" class="text_pole theater-share-content" placeholder="也可以直接粘贴内容"></textarea>
+        <button id="theater_share_upload" class="menu_button"><i class="fa-solid fa-cloud-arrow-up"></i> 上传并生成链接</button>
+        <div id="theater_share_upload_result"></div>
+    </section>
+
+    <section data-panel="link" hidden>
+        <p>粘贴由“小剧场分享”生成的作品链接：</p>
+        <div class="theater-share-toolbar">
+            <input id="theater_share_link" class="text_pole" type="url" placeholder="https://example.com/api/plugins/theater-share/items/…">
+            <button id="theater_share_open_link" class="menu_button">读取</button>
+        </div>
+        <div id="theater_share_link_result"></div>
+    </section>
+
+    <section data-panel="local" hidden>
+        <div id="theater_share_local" class="theater-share-grid"></div>
+    </section>
+</div>
