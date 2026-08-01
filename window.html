@@ -2,7 +2,7 @@
     <div class="theater-share-tabs">
         <button class="menu_button theater-share-tab active" data-tab="gallery">作品广场</button>
         <button class="menu_button theater-share-tab" data-tab="upload">上传作品</button>
-        <button class="menu_button theater-share-tab" data-tab="link">打开链接</button>
+        <button class="menu_button theater-share-tab" data-tab="link">打开分享码/链接</button>
         <button class="menu_button theater-share-tab" data-tab="local">我的收藏</button>
     </div>
 
@@ -43,9 +43,9 @@
     </section>
 
     <section data-panel="link" hidden>
-        <p>粘贴由“小剧场分享”生成的作品链接：</p>
+        <p>粘贴由“小剧场分享”生成的分享码或完整链接：</p>
         <div class="theater-share-toolbar">
-            <input id="theater_share_link" class="text_pole" type="url" placeholder="https://example.com/api/plugins/theater-share/items/…">
+            <input id="theater_share_link" class="text_pole" placeholder="TS1.xxxxx 或 https://example.com/theater-share/xxxxx.html">
             <button id="theater_share_open_link" class="menu_button">读取</button>
         </div>
         <div id="theater_share_link_result"></div>

@@ -74,9 +74,35 @@ function shareUrl(item) {
     return `${source}${item.sharePath || `/theater-share/${encodeURIComponent(item.id)}.html`}`;
 }
 
+function encodeShareCode(item) {
+    const bytes = new TextEncoder().encode(shareUrl(item));
+    let binary = '';
+    for (const byte of bytes) binary += String.fromCharCode(byte);
+    return `TS1.${btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')}`;
+}
+
+function decodeShareCode(value) {
+    const raw = String(value || '').trim();
+    if (!raw.startsWith('TS1.')) return raw;
+    const encoded = raw.slice(4).replace(/-/g, '+').replace(/_/g, '/');
+    const padded = encoded.padEnd(Math.ceil(encoded.length / 4) * 4, '=');
+    try {
+        const binary = atob(padded);
+        const bytes = Uint8Array.from(binary, character => character.charCodeAt(0));
+        return new TextDecoder().decode(bytes);
+    } catch {
+        throw new Error('分享码格式无效或已损坏。');
+    }
+}
+
 async function copyShareLink(item) {
     await navigator.clipboard.writeText(shareUrl(item));
     toastr.success('分享链接已复制。');
+}
+
+async function copyShareCode(item) {
+    await navigator.clipboard.writeText(encodeShareCode(item));
+    toastr.success('分享码已复制。');
 }
 
 function saveFavorite(item) {
@@ -190,6 +216,7 @@ function renderCard(item, options = {}) {
                 toastr.error(error.message);
             }
         }));
+        actions.append(makeButton('复制分享码', 'fa-ticket', () => copyShareCode(item).catch(error => toastr.error(error.message))));
         actions.append(makeButton('复制链接', 'fa-link', () => copyShareLink(item).catch(error => toastr.error(error.message))));
     } else {
         actions.append(makeButton('移除', 'fa-trash', () => {
@@ -323,9 +350,17 @@ async function openWindow() {
             settings().deleteTokens[response.item.id] = response.deleteToken;
             saveSettingsDebounced();
             const url = shareUrl(response.item);
-            const link = $('<input class="text_pole" readonly>').val(url);
-            result.append($('<p></p>').text('上传成功，删除凭证已保存在当前浏览器：'), link,
-                makeButton('复制链接', 'fa-copy', () => navigator.clipboard.writeText(url).then(() => toastr.success('链接已复制。'))));
+            const code = encodeShareCode(response.item);
+            const codeInput = $('<input class="text_pole" readonly>').val(code);
+            const linkInput = $('<input class="text_pole" readonly>').val(url);
+            result.append(
+                $('<p></p>').text('上传成功，删除凭证已保存在当前浏览器。把分享码发给其他插件用户即可：'),
+                codeInput,
+                makeButton('复制分享码', 'fa-ticket', () => navigator.clipboard.writeText(code).then(() => toastr.success('分享码已复制。'))),
+                $('<p></p>').text('也可以分享完整链接：'),
+                linkInput,
+                makeButton('复制链接', 'fa-copy', () => navigator.clipboard.writeText(url).then(() => toastr.success('链接已复制。'))),
+            );
             page = 1;
             await loadGallery();
         } catch (error) {
@@ -338,7 +373,8 @@ async function openWindow() {
     dialog.find('#theater_share_open_link').on('click', async () => {
         const container = dialog.find('#theater_share_link_result').empty();
         try {
-            const url = new URL(dialog.find('#theater_share_link').val());
+            const input = decodeShareCode(dialog.find('#theater_share_link').val());
+            const url = new URL(input);
             const isApiLink = url.pathname.match(/\/api\/plugins\/theater-share\/items\/[^/]+$/);
             const isPublicLink = url.pathname.match(/\/theater-share\/[^/]+\.html$/);
             if (!['http:', 'https:'].includes(url.protocol) || (!isApiLink && !isPublicLink)) {
