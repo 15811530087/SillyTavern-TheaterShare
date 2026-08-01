@@ -1,11 +1,11 @@
 {
-    "display_name": "小剧场分享",
+    "display_name": "小剧场",
     "loading_order": 50,
     "requires": [],
     "optional": [],
     "js": "index.js",
     "css": "style.css",
     "author": "SillyTavern community",
-    "version": "2.0.1",
+    "version": "2.1.0",
     "homePage": "https://github.com/15811530087/SillyTavern-TheaterShare"
 }

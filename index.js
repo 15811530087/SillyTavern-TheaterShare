@@ -516,7 +516,7 @@ async function openWindow() {
 
     selectTab('gallery');
     loadGallery();
-    await callGenericPopup(dialog, POPUP_TYPE.TEXT, '小剧场分享', {
+    await callGenericPopup(dialog, POPUP_TYPE.TEXT, '小剧场', {
         wide: true,
         large: true,
         allowVerticalScrolling: true,
@@ -529,7 +529,7 @@ jQuery(async () => {
     const menuButton = $(`
         <div id="theater_share_wand_button" class="list-group-item flex-container flexGap5">
             <div class="fa-fw fa-solid fa-masks-theater extensionsMenuExtensionButton"></div>
-            <span>小剧场分享</span>
+            <span>小剧场</span>
         </div>`);
     menuButton.on('click', () => openWindow().catch(error => toastr.error(error.message)));
     menuContainer.append(menuButton);
