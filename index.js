@@ -198,11 +198,26 @@ function removeFavorite(item) {
 }
 
 async function previewItem(item) {
-    let body;
+    const body = $('<div class="theater-share-detail"></div>');
+    const header = $('<header class="theater-share-detail-header"></header>');
+    header.append($('<h2></h2>').text(item.title));
+    header.append(
+        $('<div class="theater-share-meta"></div>')
+            .append($('<i class="fa-solid fa-user-pen"></i>'), document.createTextNode(` 作者：${item.author || '匿名玩家'}  ·  `),
+                $('<i class="fa-regular fa-clock"></i>'), document.createTextNode(` ${formatDate(item.createdAt)}`)),
+    );
+    if (item.description) header.append($('<p class="theater-share-detail-description"></p>').text(item.description));
+    if (Array.isArray(item.tags) && item.tags.length) {
+        const tags = $('<div class="theater-share-tags"></div>');
+        item.tags.forEach(tag => tags.append($('<span class="theater-share-tag theater-share-tag-static"></span>').text(`#${tag}`)));
+        header.append(tags);
+    }
+    body.append(header, $('<h3 class="theater-share-detail-content-title">小剧场内容</h3>'));
     if (item.contentType === 'html') {
-        body = $('<div></div>')
-            .append($('<p class="theater-share-meta"></p>').text('HTML 在隔离沙箱中运行，无法访问你的酒馆页面。'))
-            .append($('<iframe class="theater-share-preview-frame" sandbox="allow-scripts"></iframe>').attr('srcdoc', item.content));
+        body.append(
+            $('<p class="theater-share-meta"></p>').text('HTML 内容将在隔离环境中预览。'),
+            $('<iframe class="theater-share-preview-frame" sandbox="allow-scripts"></iframe>').attr('srcdoc', item.content),
+        );
     } else {
         let content = item.content;
         if (item.contentType === 'json') {
@@ -212,9 +227,9 @@ async function previewItem(item) {
                 // Keep the original content if an older item contains malformed JSON.
             }
         }
-        body = $('<pre class="theater-share-preview-text"></pre>').text(content);
+        body.append($('<pre class="theater-share-preview-text"></pre>').text(content));
     }
-    return await callGenericPopup(body, POPUP_TYPE.TEXT, item.title, {
+    return await callGenericPopup(body, POPUP_TYPE.TEXT, '小剧场详情', {
         wide: true,
         large: true,
         allowVerticalScrolling: true,
@@ -294,7 +309,8 @@ function renderCard(item, options = {}) {
         card.append(tags);
     }
     const actions = $('<div class="theater-share-actions"></div>');
-    actions.append(makeButton('预览', 'fa-eye', async () => {
+
+    const openPreview = async () => {
         try {
             const parentPopup = card.closest('dialog');
             const fullItem = await loadFullItem(item, item.source);
@@ -306,7 +322,23 @@ function renderCard(item, options = {}) {
         } catch (error) {
             toastr.error(error.message);
         }
-    }));
+    };
+
+    if (options.gallery) {
+        card.addClass('theater-share-card-clickable').attr({ tabindex: '0', role: 'button', 'aria-label': `查看小剧场：${item.title}` });
+        card.on('click', event => {
+            if ($(event.target).closest('button').length) return;
+            openPreview();
+        });
+        card.on('keydown', event => {
+            if (event.key !== 'Enter' && event.key !== ' ') return;
+            event.preventDefault();
+            openPreview();
+        });
+    } else {
+        actions.append(makeButton('预览', 'fa-eye', openPreview));
+    }
+
     if (!options.local) {
         actions.append(makeButton('收藏', 'fa-bookmark', async () => {
             try {
@@ -315,9 +347,11 @@ function renderCard(item, options = {}) {
                 toastr.error(error.message);
             }
         }));
-        actions.append(makeButton('复制分享码', 'fa-ticket', () => copyShareCode(item).catch(error => toastr.error(error.message))));
-        if (item.source !== 'offline') {
-            actions.append(makeButton('复制链接', 'fa-link', () => copyShareLink(item).catch(error => toastr.error(error.message))));
+        if (!options.gallery) {
+            actions.append(makeButton('复制分享码', 'fa-ticket', () => copyShareCode(item).catch(error => toastr.error(error.message))));
+            if (item.source !== 'offline') {
+                actions.append(makeButton('复制链接', 'fa-link', () => copyShareLink(item).catch(error => toastr.error(error.message))));
+            }
         }
     } else {
         actions.append(makeButton('移除', 'fa-trash', () => {
@@ -327,7 +361,7 @@ function renderCard(item, options = {}) {
     }
     const token = settings().deleteTokens[item.id];
     if (token && !options.local) {
-        actions.append(makeButton('删除上传', 'fa-trash', async () => {
+        actions.append(makeButton('删除', 'fa-trash', async () => {
             const confirmed = await callGenericPopup('确定删除这个公开作品吗？此操作不可恢复。', POPUP_TYPE.CONFIRM);
             if (!confirmed) return;
             try {
@@ -376,7 +410,7 @@ async function openWindow() {
             total = result.total;
             container.empty();
             if (!result.items.length) container.append($('<p></p>').text('暂时没有作品，来上传第一个小剧场吧。'));
-            result.items.forEach(item => container.append(renderCard({ ...item, source: PUBLIC_API_URL })));
+            result.items.forEach(item => container.append(renderCard({ ...item, source: PUBLIC_API_URL }, { gallery: true })));
             const pages = Math.max(1, Math.ceil(total / pageSize));
             dialog.find('#theater_share_page').text(`第 ${page} / ${pages} 页，共 ${total} 个`);
             dialog.find('#theater_share_previous').prop('disabled', page <= 1);

@@ -66,17 +66,21 @@
     box-shadow: 0 5px 18px rgba(0, 0, 0, 0.08); transition: transform 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
 }
 .theater-share-card:hover { transform: translateY(-2px); border-color: var(--theater-accent); box-shadow: 0 9px 24px rgba(0, 0, 0, 0.16); }
+.theater-share-card-clickable { cursor: pointer; }
+.theater-share-card-clickable:focus-visible { outline: 2px solid var(--theater-accent); outline-offset: 2px; }
 .theater-share-card-title { display: flex; align-items: flex-start; justify-content: space-between; gap: 0.5rem; }
 .theater-share-card h3 { margin: 0 0 0.35rem; font-size: 1.04rem; overflow-wrap: anywhere; }
 .theater-share-card p { margin: 0.65rem 0; white-space: pre-wrap; overflow-wrap: anywhere; opacity: 0.86; }
 .theater-share-type-badge { padding: 0.15rem 0.45rem; border-radius: 6px; color: var(--theater-accent); background: color-mix(in srgb, var(--theater-accent) 13%, transparent); font-size: 0.68rem; font-weight: 700; text-transform: uppercase; }
 .theater-share-meta { opacity: 0.62; font-size: 0.82rem; }
-.theater-share-card .theater-share-actions { margin-top: auto; padding-top: 0.7rem; }
-.theater-share-card .menu_button { min-height: 31px; padding: 0.3rem 0.55rem; font-size: 0.82rem; }
+.theater-share-card .theater-share-actions { display: grid; grid-template-columns: repeat(auto-fit, minmax(105px, 1fr)); gap: 0.45rem; width: 100%; margin-top: auto; padding-top: 0.7rem; }
+.theater-share-card .menu_button { width: 100%; min-width: 0; min-height: 32px; height: 32px; padding: 0.25rem 0.8rem; font-size: 0.82rem; white-space: nowrap; }
 
 .theater-share-tags { display: flex; flex-wrap: wrap; gap: 0.38rem; margin: 0.65rem 0; }
 .theater-share-tag { border: 1px solid color-mix(in srgb, var(--theater-accent) 72%, transparent); border-radius: 999px; padding: 0.2rem 0.62rem; color: var(--theater-accent); background: color-mix(in srgb, var(--theater-accent) 11%, transparent); cursor: pointer; font-size: 0.78rem; font-weight: 650; transition: 140ms ease; }
 .theater-share-tag:hover { color: white; background: var(--theater-accent); transform: translateY(-1px); }
+.theater-share-tag-static { cursor: default; }
+.theater-share-tag-static:hover { color: var(--theater-accent); background: color-mix(in srgb, var(--theater-accent) 11%, transparent); transform: none; }
 
 .theater-share-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.9rem 1rem; }
 .theater-share-field { display: flex; flex-direction: column; gap: 0.35rem; }
@@ -103,6 +107,10 @@
 
 .theater-share-preview-text { white-space: pre-wrap; overflow-wrap: anywhere; max-height: 60vh; padding: 1rem; overflow: auto; border-radius: 10px; background: var(--black30a); }
 .theater-share-preview-frame { width: min(850px, 85vw); height: 60vh; border: 1px solid var(--theater-border); border-radius: 10px; background: white; }
+.theater-share-detail-header { margin-bottom: 1rem; padding-bottom: 0.9rem; border-bottom: 1px solid var(--theater-border); }
+.theater-share-detail-header h2 { margin: 0 0 0.45rem; overflow-wrap: anywhere; }
+.theater-share-detail-description { margin: 0.8rem 0 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+.theater-share-detail-content-title { margin: 0 0 0.65rem; font-size: 1rem; }
 .theater-share-pager { justify-content: center; margin-top: 1rem; }
 .theater-share-pager span { min-width: 9rem; text-align: center; opacity: 0.72; }
 
@@ -130,7 +138,7 @@
     .theater-share-search { flex-basis: 100%; min-width: 0; }
     .theater-share-grid { grid-template-columns: minmax(0, 1fr); gap: 0.65rem; }
     .theater-share-card { min-height: 0; padding: 0.8rem; }
-    .theater-share-card .theater-share-actions .menu_button { flex: 1 1 auto; }
+    .theater-share-card .theater-share-actions { grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); }
     .theater-share-form-grid { grid-template-columns: 1fr; }
     .theater-share-field { grid-column: 1 / -1; }
     .theater-share-content { min-height: 190px; }
@@ -141,6 +149,34 @@
     .theater-share-pager { justify-content: space-between; gap: 0.35rem; }
     .theater-share-pager span { order: -1; flex-basis: 100%; min-width: 0; }
     .theater-share-pager .menu_button { flex: 1; }
+}
+
+@media (min-width: 701px) {
+    .theater-share-window { width: min(980px, 90vw); }
+    .theater-share-hero {
+        position: relative; padding: 1rem 1.15rem; margin-bottom: 0.8rem; overflow: hidden;
+        border: 1px solid var(--theater-border); border-radius: 16px;
+        background: linear-gradient(120deg, color-mix(in srgb, var(--theater-accent) 14%, var(--theater-surface)), var(--theater-surface) 58%, color-mix(in srgb, #8b5cf6 11%, var(--theater-surface)));
+    }
+    .theater-share-hero::after {
+        content: ''; position: absolute; top: -55px; right: -35px; width: 180px; height: 180px;
+        border-radius: 50%; background: color-mix(in srgb, var(--theater-accent) 10%, transparent); filter: blur(4px); pointer-events: none;
+    }
+    .theater-share-tabs { gap: 0.5rem; padding: 0.45rem; }
+    .theater-share-tab { min-height: 44px; font-weight: 650; }
+    .theater-share-panel { padding: 1.2rem; }
+    .theater-share-section-heading h3 { font-size: 1.25rem; }
+    .theater-share-toolbar { flex-wrap: nowrap; }
+    .theater-share-icon-button { min-width: 92px; }
+    .theater-share-grid { grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: 1rem; }
+    .theater-share-card { min-height: 205px; padding: 1.05rem; }
+    .theater-share-card h3 { font-size: 1.08rem; }
+    .theater-share-form-grid { gap: 1rem 1.2rem; }
+    .theater-share-file-field { padding: 1rem; }
+    .theater-share-submit-actions .menu_button { min-width: 180px; min-height: 38px; }
+    .theater-share-detail { min-width: min(760px, 76vw); }
+    .theater-share-detail-header { padding: 0.2rem 0.25rem 1rem; }
+    .theater-share-detail-header h2 { font-size: 1.4rem; }
 }
 
 @media (prefers-reduced-motion: reduce) {
