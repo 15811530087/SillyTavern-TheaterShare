@@ -2,7 +2,12 @@ import { saveSettingsDebounced } from '../../../../script.js';
 import { extension_settings, renderExtensionTemplateAsync } from '../../../extensions.js';
 import { callGenericPopup, POPUP_TYPE } from '../../../popup.js';
 
-const MODULE_NAME = 'third-party/theater-share';
+const EXTENSIONS_PATH_MARKER = '/scripts/extensions/';
+const currentDirectory = new URL('.', import.meta.url).pathname;
+const markerIndex = currentDirectory.indexOf(EXTENSIONS_PATH_MARKER);
+const MODULE_NAME = markerIndex >= 0
+    ? decodeURIComponent(currentDirectory.slice(markerIndex + EXTENSIONS_PATH_MARKER.length).replace(/\/$/, ''))
+    : 'third-party/SillyTavern-TheaterShare';
 const SETTINGS_KEY = 'theaterShare';
 const API_PATH = '/api/plugins/theater-share';
 const PUBLIC_API_URL = 'https://sillytavern-theater-share.heater-hare-ata.workers.dev';
