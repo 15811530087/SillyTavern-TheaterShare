@@ -9,6 +9,9 @@
 .theater-share-card h3 { margin: 0 0 0.35rem; overflow-wrap: anywhere; }
 .theater-share-card p { white-space: pre-wrap; overflow-wrap: anywhere; }
 .theater-share-meta { opacity: 0.75; font-size: 0.9em; }
+.theater-share-tags { display: flex; flex-wrap: wrap; gap: 0.35rem; margin: 0.55rem 0; }
+.theater-share-tag { border: 1px solid var(--SmartThemeQuoteColor); border-radius: 999px; padding: 0.12rem 0.55rem; color: inherit; background: transparent; cursor: pointer; }
+.theater-share-tag:hover { background: var(--SmartThemeQuoteColor); }
 .theater-share-content { min-height: 220px; font-family: var(--monoFontFamily, monospace); }
 .theater-share-preview-text { white-space: pre-wrap; overflow-wrap: anywhere; max-height: 60vh; overflow: auto; }
 .theater-share-preview-frame { width: min(850px, 85vw); height: 60vh; border: 1px solid var(--SmartThemeBorderColor); background: white; }

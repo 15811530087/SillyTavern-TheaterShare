@@ -159,6 +159,21 @@ function renderCard(item, options = {}) {
     if (item.description) {
         card.append($('<p></p>').text(item.description));
     }
+    if (Array.isArray(item.tags) && item.tags.length) {
+        const tags = $('<div class="theater-share-tags"></div>');
+        for (const tag of item.tags) {
+            tags.append($('<button type="button" class="theater-share-tag"></button>')
+                .text(`#${tag}`)
+                .attr('title', `搜索标签：${tag}`)
+                .on('click', () => {
+                    const search = $('#theater_share_search');
+                    if (search.length) {
+                        search.val(tag).trigger($.Event('keydown', { key: 'Enter' }));
+                    }
+                }));
+        }
+        card.append(tags);
+    }
     const actions = $('<div class="theater-share-actions"></div>');
     actions.append(makeButton('预览', 'fa-eye', async () => {
         try {
@@ -296,6 +311,7 @@ async function openWindow() {
                 title: dialog.find('#theater_share_title').val(),
                 author: dialog.find('#theater_share_author').val(),
                 description: dialog.find('#theater_share_description').val(),
+                tags: dialog.find('#theater_share_tags').val(),
                 contentType: dialog.find('#theater_share_content_type').val(),
                 content: dialog.find('#theater_share_content').val(),
             };
