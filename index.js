@@ -6,6 +6,7 @@ const MODULE_NAME = 'third-party/theater-share';
 const SETTINGS_KEY = 'theaterShare';
 const API_PATH = '/api/plugins/theater-share';
 const MAX_FILE_SIZE = 256 * 1024;
+const OFFLINE_CODE_PREFIX = 'TS2.';
 const DEFAULT_SETTINGS = {
     serverUrl: '',
     favorites: [],
@@ -95,13 +96,99 @@ function decodeShareCode(value) {
     }
 }
 
+function encodeUtf8Base64Url(value) {
+    const bytes = new TextEncoder().encode(value);
+    let binary = '';
+    for (const byte of bytes) binary += String.fromCharCode(byte);
+    return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+
+function decodeUtf8Base64Url(value) {
+    const encoded = value.replace(/-/g, '+').replace(/_/g, '/');
+    const padded = encoded.padEnd(Math.ceil(encoded.length / 4) * 4, '=');
+    const binary = atob(padded);
+    const bytes = Uint8Array.from(binary, character => character.charCodeAt(0));
+    return new TextDecoder().decode(bytes);
+}
+
+function encodeOfflineShareCode(item) {
+    const payload = {
+        version: 2,
+        item: {
+            id: item.id,
+            title: item.title,
+            author: item.author,
+            description: item.description,
+            tags: item.tags,
+            contentType: item.contentType,
+            content: item.content,
+            createdAt: item.createdAt,
+        },
+    };
+    return `${OFFLINE_CODE_PREFIX}${encodeUtf8Base64Url(JSON.stringify(payload))}`;
+}
+
+function decodeOfflineShareCode(value) {
+    try {
+        const payload = JSON.parse(decodeUtf8Base64Url(value.slice(OFFLINE_CODE_PREFIX.length)));
+        if (payload?.version !== 2 || !payload.item || typeof payload.item.content !== 'string') {
+            throw new Error('分享码内容不完整。');
+        }
+        const item = payload.item;
+        if (!item.title || !['text', 'html', 'json'].includes(item.contentType)) {
+            throw new Error('分享码中的作品格式无效。');
+        }
+        return {
+            ...item,
+            tags: Array.isArray(item.tags) ? item.tags.slice(0, 10) : [],
+            source: 'offline',
+            offlineCode: value,
+        };
+    } catch (error) {
+        throw new Error(`TS2 离线分享码无效：${error.message}`);
+    }
+}
+
+function makeDraftItem(dialog) {
+    const tags = String(dialog.find('#theater_share_tags').val() || '')
+        .split(/[,，]/)
+        .map(tag => tag.trim().replace(/^#+/, '').slice(0, 24))
+        .filter(Boolean);
+    return {
+        id: `offline-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`,
+        title: String(dialog.find('#theater_share_title').val() || '').trim().slice(0, 100),
+        author: String(dialog.find('#theater_share_author').val() || '').trim().slice(0, 60) || '匿名玩家',
+        description: String(dialog.find('#theater_share_description').val() || '').trim().slice(0, 500),
+        tags: [...new Set(tags)].slice(0, 10),
+        contentType: dialog.find('#theater_share_content_type').val(),
+        content: String(dialog.find('#theater_share_content').val() || ''),
+        createdAt: new Date().toISOString(),
+    };
+}
+
+function validateDraftItem(item) {
+    if (!item.title || !item.content.trim()) {
+        throw new Error('标题和小剧场内容不能为空。');
+    }
+    if (new TextEncoder().encode(item.content).length > MAX_FILE_SIZE) {
+        throw new Error('内容不能超过 256 KB。');
+    }
+    if (item.contentType === 'json') {
+        try {
+            JSON.parse(item.content);
+        } catch {
+            throw new Error('JSON 文件格式无效。');
+        }
+    }
+}
+
 async function copyShareLink(item) {
     await navigator.clipboard.writeText(shareUrl(item));
     toastr.success('分享链接已复制。');
 }
 
 async function copyShareCode(item) {
-    await navigator.clipboard.writeText(encodeShareCode(item));
+    await navigator.clipboard.writeText(item.offlineCode || encodeShareCode(item));
     toastr.success('分享码已复制。');
 }
 
@@ -217,7 +304,9 @@ function renderCard(item, options = {}) {
             }
         }));
         actions.append(makeButton('复制分享码', 'fa-ticket', () => copyShareCode(item).catch(error => toastr.error(error.message))));
-        actions.append(makeButton('复制链接', 'fa-link', () => copyShareLink(item).catch(error => toastr.error(error.message))));
+        if (item.source !== 'offline') {
+            actions.append(makeButton('复制链接', 'fa-link', () => copyShareLink(item).catch(error => toastr.error(error.message))));
+        }
     } else {
         actions.append(makeButton('移除', 'fa-trash', () => {
             removeFavorite(item);
@@ -327,6 +416,26 @@ async function openWindow() {
             dialog.find('#theater_share_title').val(file.name.replace(/\.[^.]+$/, ''));
         }
     });
+    dialog.find('#theater_share_offline').on('click', () => {
+        const result = dialog.find('#theater_share_offline_result').empty();
+        try {
+            const item = makeDraftItem(dialog);
+            validateDraftItem(item);
+            const code = encodeOfflineShareCode(item);
+            const output = $('<textarea class="text_pole" rows="5" readonly></textarea>').val(code);
+            result.append(
+                $('<p></p>').text(`离线分享码已生成（${code.length.toLocaleString()} 个字符）。完整作品已包含在分享码中，不会上传到服务器。`),
+                output,
+                makeButton('复制 TS2 分享码', 'fa-copy', () => navigator.clipboard.writeText(code).then(() => toastr.success('TS2 分享码已复制。'))),
+            );
+            if (code.length > 100000) {
+                result.append($('<p class="theater-share-meta"></p>').text('分享码较长，部分聊天软件可能截断；建议通过文本文件发送。'));
+            }
+        } catch (error) {
+            toastr.error(error.message);
+            result.append($('<p></p>').text(error.message));
+        }
+    });
     dialog.find('#theater_share_upload').on('click', async function () {
         const button = $(this).prop('disabled', true);
         const result = dialog.find('#theater_share_upload_result').empty();
@@ -334,14 +443,9 @@ async function openWindow() {
             if (normalizeServerUrl() !== window.location.origin) {
                 throw new Error('为保护 CSRF 安全，上传只能提交到当前打开的酒馆服务器；请将分享服务器地址留空后上传。');
             }
-            const payload = {
-                title: dialog.find('#theater_share_title').val(),
-                author: dialog.find('#theater_share_author').val(),
-                description: dialog.find('#theater_share_description').val(),
-                tags: dialog.find('#theater_share_tags').val(),
-                contentType: dialog.find('#theater_share_content_type').val(),
-                content: dialog.find('#theater_share_content').val(),
-            };
+            const draft = makeDraftItem(dialog);
+            validateDraftItem(draft);
+            const payload = { ...draft, tags: draft.tags.join(',') };
             const response = await fetchJson(apiUrl('/items'), {
                 method: 'POST',
                 headers: getRequestHeaders(),
@@ -373,7 +477,12 @@ async function openWindow() {
     dialog.find('#theater_share_open_link').on('click', async () => {
         const container = dialog.find('#theater_share_link_result').empty();
         try {
-            const input = decodeShareCode(dialog.find('#theater_share_link').val());
+            const rawInput = String(dialog.find('#theater_share_link').val() || '').trim();
+            if (rawInput.startsWith(OFFLINE_CODE_PREFIX)) {
+                container.append(renderCard(decodeOfflineShareCode(rawInput)));
+                return;
+            }
+            const input = decodeShareCode(rawInput);
             const url = new URL(input);
             const isApiLink = url.pathname.match(/\/api\/plugins\/theater-share\/items\/[^/]+$/);
             const isPublicLink = url.pathname.match(/\/theater-share\/[^/]+\.html$/);

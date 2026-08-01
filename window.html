@@ -38,14 +38,18 @@
         <input id="theater_share_file" type="file" accept=".txt,.md,.html,.htm,.json,text/plain,text/html,application/json">
         <label>内容 *</label>
         <textarea id="theater_share_content" class="text_pole theater-share-content" placeholder="也可以直接粘贴内容"></textarea>
-        <button id="theater_share_upload" class="menu_button"><i class="fa-solid fa-cloud-arrow-up"></i> 上传并生成链接</button>
+        <div class="theater-share-actions">
+            <button id="theater_share_offline" class="menu_button"><i class="fa-solid fa-ticket"></i> 生成 TS2 离线分享码</button>
+            <button id="theater_share_upload" class="menu_button"><i class="fa-solid fa-cloud-arrow-up"></i> 上传到服务器</button>
+        </div>
+        <div id="theater_share_offline_result"></div>
         <div id="theater_share_upload_result"></div>
     </section>
 
     <section data-panel="link" hidden>
         <p>粘贴由“小剧场分享”生成的分享码或完整链接：</p>
         <div class="theater-share-toolbar">
-            <input id="theater_share_link" class="text_pole" placeholder="TS1.xxxxx 或 https://example.com/theater-share/xxxxx.html">
+            <textarea id="theater_share_link" class="text_pole" rows="4" placeholder="TS2.xxxxx、TS1.xxxxx 或完整分享链接"></textarea>
             <button id="theater_share_open_link" class="menu_button">读取</button>
         </div>
         <div id="theater_share_link_result"></div>
