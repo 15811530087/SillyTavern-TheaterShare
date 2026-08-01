@@ -214,11 +214,23 @@ async function previewItem(item) {
         }
         body = $('<pre class="theater-share-preview-text"></pre>').text(content);
     }
-    await callGenericPopup(body, POPUP_TYPE.TEXT, item.title, {
+    return await callGenericPopup(body, POPUP_TYPE.TEXT, item.title, {
         wide: true,
         large: true,
         allowVerticalScrolling: true,
+        okButton: '确认使用',
+        cancelButton: '返回',
     });
+}
+
+function insertIntoComposer(content) {
+    const textarea = $('#send_textarea');
+    if (!textarea.length) {
+        throw new Error('没有找到酒馆输入框，请先打开一个聊天。');
+    }
+    const current = String(textarea.val() || '');
+    const next = current.trim() ? `${current}\n\n${content}` : content;
+    textarea.val(next).trigger('input').trigger('change').focus();
 }
 
 async function loadFullItem(item, source = PUBLIC_API_URL) {
@@ -284,7 +296,13 @@ function renderCard(item, options = {}) {
     const actions = $('<div class="theater-share-actions"></div>');
     actions.append(makeButton('预览', 'fa-eye', async () => {
         try {
-            await previewItem(await loadFullItem(item, item.source));
+            const parentPopup = card.closest('dialog');
+            const fullItem = await loadFullItem(item, item.source);
+            const confirmed = await previewItem(fullItem);
+            if (confirmed !== 1) return;
+            insertIntoComposer(fullItem.content);
+            parentPopup.find('.popup-button-ok').trigger('click');
+            toastr.success('已添加到酒馆输入框。');
         } catch (error) {
             toastr.error(error.message);
         }
